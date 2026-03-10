@@ -1,0 +1,56 @@
+---
+description: Data fetching with server prefetch + TanStack Query hydration and client-side queries. Use for app/** and any file that fetches data or uses useQuery.
+globs: app/**/*.{ts,tsx},src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Data & Fetching (TanStack Query)
+
+## Overview
+
+- **Server**: Prefetch with `QueryClient` per request, then `dehydrate()` and pass state to `<HydrationBoundary>` so the client has initial data without refetching.
+- **Client**: Use a single `QueryClient` (via `QueryClientProvider`). Use `useQuery` / `useMutation` in Client Components; prefetched data is consumed when wrapped in `HydrationBoundary`.
+
+## Server-side prefetch (Next.js App Router)
+
+- In **Server Components** (async, no `"use client"`):
+  - Create a **new** `QueryClient()` per request (never reuse across requests).
+  - Prefetch with `await queryClient.prefetchQuery({ queryKey, queryFn })`.
+  - For dependent data: `await queryClient.fetchQuery(...)` for the first, then `prefetchQuery` for the dependent query.
+  - Return JSX that wraps children in `<HydrationBoundary state={dehydrate(queryClient)}>`.
+- Prefetch **close to where data is used** (same page or a parent). Avoid prefetching in a page and consuming in a layout to prevent hydration/SSR issues.
+- **queryFn in Server Components**: Pass a function that is serializable. Prefer calling the fetcher inside the function (e.g. `queryFn: () => getPosts()`) rather than passing `getPosts` directly if you hit Server Action serialization errors.
+
+## Client-side setup
+
+- **QueryClient**: Create one per app lifecycle on the client (e.g. in a `Providers` component with `useState(() => new QueryClient(...))` or a `getQueryClient()` that reuses a single instance in the browser).
+- **QueryClientProvider**: Wrap the app (e.g. in `app/providers.tsx` with `"use client"`) so all Client Components can use `useQuery` / `useMutation`.
+- **Defaults**: Set `staleTime` (e.g. `60 * 1000`) in `QueryClient` defaults to avoid immediate refetch after hydration.
+
+## Query keys
+
+- Use **stable, serializable** array keys: `["posts"]`, `["product", id]`, `["user", "profile"]`.
+- Do not put non-serializable values (e.g. class instances) in query keys.
+- Keep keys consistent between server prefetch and client `useQuery`.
+
+## Client components using prefetched data
+
+- Use `useQuery` with the **same** `queryKey` (and same `queryFn` contract) as used in `prefetchQuery` on the server.
+- Data will be available immediately when the component is under the same `HydrationBoundary` that received the dehydrated state.
+- You can mix prefetched and non-prefetched queries; non-prefetched ones will fetch on the client.
+
+## Mutations
+
+- Use `useMutation` for create/update/delete.
+- On success: call `queryClient.invalidateQueries({ queryKey })` or `queryClient.setQueryData` so the UI stays in sync.
+
+## Error and loading states
+
+- Always handle `isLoading`, `isError`, and `error` from hooks in the UI.
+- Use shadcn/ui components (e.g. `Alert`, `Skeleton`) for loading and error states.
+- For **critical** server data, use `queryClient.fetchQuery` instead of `prefetchQuery` so failures throw and you can return 404/500.
+
+## References
+
+- [TanStack Query – Server Rendering & Hydration](https://tanstack.com/query/latest/docs/framework/react/guides/ssr)
+- [TanStack Query – Advanced SSR (Next.js App Router)](https://tanstack.com/query/latest/docs/framework/react/guides/advanced-ssr)

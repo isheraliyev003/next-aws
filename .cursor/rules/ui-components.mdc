@@ -1,0 +1,32 @@
+---
+description: UI component conventions using shadcn/ui and Tailwind.
+globs: app/**/_components/**/*.tsx,app/(marketing)/**/*.{tsx},app/(dashboard)/**/*.{tsx}
+alwaysApply: false
+---
+
+# UI Components (shadcn/ui)
+
+## Imports and usage
+
+- Prefer shadcn/ui components over raw HTML for common primitives:
+  - Buttons, inputs, textareas, dialogs, dropdowns, etc.
+- Import from your central `@/components/ui/*` entrypoints when available.
+
+## Styling
+
+- Use Tailwind utility classes for layout and spacing.
+- Do not inline complex styles directly; prefer Tailwind or small CSS variables when needed.
+- Keep color, radius, and typography consistent with the existing design tokens.
+
+## Component design
+
+- Components must be functional and typed:
+  - Define a `Props` type or interface for public props.
+- Prefer small, composable components over very large ones.
+- Colocate components under an `_components` folder next to the route that uses them.
+
+## Accessibility
+
+- Use the accessible patterns built into shadcn/ui (e.g. `Dialog`, `AlertDialog`, `Popover`).
+- Ensure form fields have labels and proper `aria-*` attributes when necessary.
+- Maintain focus states and keyboard navigation.

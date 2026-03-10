@@ -1,0 +1,49 @@
+---
+description: TypeScript conventions for this project
+globs: **/*.ts,**/*.tsx
+alwaysApply: false
+---
+
+# TypeScript Conventions
+
+## General
+
+- Use strict TypeScript; avoid `any`. Prefer `unknown` and type guards when types are not known.
+- Define types/interfaces for component props, API responses, and shared data structures.
+- Use `type` for object shapes and unions; use `interface` when you need declaration merging or extendability.
+
+## Imports
+
+- Prefer `import type` for type-only imports to keep bundles small and intent clear.
+
+```typescript
+// Prefer
+import type { Metadata } from "next";
+
+// Avoid when only types are needed
+import { Metadata } from "next";
+```
+
+## Error handling
+
+- Do not use empty `catch` blocks. Log and/or rethrow with context.
+
+```typescript
+// Prefer
+try {
+  await doSomething();
+} catch (e) {
+  console.error("doSomething failed", e);
+  throw e;
+}
+
+// Avoid
+try {
+  await doSomething();
+} catch {}
+```
+
+## Naming
+
+- Use PascalCase for components and types; camelCase for functions, variables, and file names (except React components: `ComponentName.tsx`).
+- Use descriptive names; avoid single-letter names except in short loops or callbacks.

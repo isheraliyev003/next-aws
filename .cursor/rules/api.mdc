@@ -1,0 +1,43 @@
+---
+description: Conventions for Next.js App Router API routes, including error handling and response shapes.
+globs: app/api/**/*.ts
+alwaysApply: false
+---
+
+# API Routes
+
+## Structure
+
+- Implement App Router API routes under `app/api/segment/route.ts`.
+- Export only the HTTP methods you need: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`.
+
+## Responses
+
+- Always return JSON using `NextResponse.json`.
+- Use a consistent response shape:
+  - Success: domain-specific fields (`data`, `items`, etc.).
+  - Error: `{ error: string; code?: string }`.
+
+## Error handling
+
+- Wrap external calls (DB, HTTP, 3rd-party APIs) in `try/catch`.
+- On validation errors, respond with status `400` and a specific `error` message.
+- On missing resources, respond with status `404`.
+- On unexpected errors:
+  - Log with context.
+  - Return `NextResponse.json({ error: "Internal Server Error" }, { status: 500 })`.
+
+## TypeScript
+
+- Define types for:
+  - Request body.
+  - Query params (if used).
+  - Response payload.
+- Avoid `any`; prefer explicit types or `unknown` plus type guards.
+
+## TanStack Query Integration
+
+- When routes are designed for TanStack Query:
+  - Prefer stable JSON shapes that map cleanly to query keys.
+  - Avoid mixing HTML or non-JSON content in API responses.
+  - Document expected query keys in the calling code (e.g. `["products", id]`).

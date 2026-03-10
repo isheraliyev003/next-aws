@@ -1,0 +1,37 @@
+---
+description: Next.js App Router and React patterns for this project
+globs: app/**/*.tsx
+alwaysApply: false
+---
+
+# Next.js & React Patterns
+
+## App Router
+
+- All routes live under `app/`; use `layout.tsx` for shared UI and `page.tsx` for route content.
+- Use `metadata` export in layouts/pages for title and description.
+- Prefer colocating route-specific components in the same directory or a `_components` folder.
+
+## Server vs Client
+
+- **Default to Server Components.** No `"use client"` unless the component uses:
+  - React hooks (`useState`, `useEffect`, etc.)
+  - Browser APIs or event handlers that require client JS
+  - Third-party client-only libraries
+- Put `"use client"` at the top of the file, once, for the component that needs it; keep children as Server Components when possible.
+
+## Components
+
+- Use functional components only.
+- Prefer explicit types for props (e.g. `Readonly<{ children: React.ReactNode }>`).
+- Extract reusable logic into custom hooks in client components; keep server components thin.
+
+## Styling
+
+- Use Tailwind via `className`. Use existing CSS variables from `app/globals.css` (e.g. font variables) when relevant.
+- Prefer utility classes; avoid inline styles unless necessary for dynamic values.
+
+## Data and APIs
+
+- Fetch in Server Components when possible (no need for `useEffect` + fetch).
+- For API routes, add them under `app/api/`; return proper status codes and JSON.
