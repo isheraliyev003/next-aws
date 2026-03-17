@@ -4,7 +4,9 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { useState, type ReactNode } from "react";
+import { Provider as ReduxProvider } from "react-redux";
+import { useMemo, useState, type ReactNode } from "react";
+import { makeStore } from "@/redux/store";
 
 function makeQueryClient() {
   return new QueryClient({
@@ -16,10 +18,24 @@ function makeQueryClient() {
   });
 }
 
-export default function Providers({ children }: { children: ReactNode }) {
+export default function Providers({
+  children,
+  initialSidebarOpen,
+}: {
+  children: ReactNode;
+  initialSidebarOpen?: boolean;
+}) {
   const [queryClient] = useState(() => makeQueryClient());
+  const { store } = useMemo(
+    () => makeStore(initialSidebarOpen),
+    [initialSidebarOpen]
+  );
 
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <ReduxProvider store={store}>
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    </ReduxProvider>
   );
 }
